@@ -26,7 +26,9 @@ debug: pull
 	cmake $(GENERATOR) -DCMAKE_BUILD_TYPE=Debug ${BUILD_FLAGS} ../../duckdb/CMakeLists.txt -DEXTERNAL_EXTENSION_DIRECTORIES=../../rocksdb_scanner -B. && \
 	cmake --build . --config Debug
 
-release: pull
+# release: pull
+# do not pull now that we changed a file in the duckdb folder..
+release:
 	mkdir -p build/release && \
 	cd build/release && \
 	cmake $(GENERATOR) -DCMAKE_BUILD_TYPE=RelWithDebInfo ${BUILD_FLAGS} ../../duckdb/CMakeLists.txt -DEXTERNAL_EXTENSION_DIRECTORIES=../../rocksdb_scanner -B. && \
