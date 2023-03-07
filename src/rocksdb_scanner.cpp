@@ -14,6 +14,7 @@
 #include "duckdb/storage/storage_extension.hpp"
 
 #include <cmath>
+#include <iostream> // debug
 
 namespace duckdb {
 
@@ -41,10 +42,12 @@ struct SqliteGlobalState : public GlobalTableFunctionState {
 	}
 };
 
-static unique_ptr<FunctionData> SqliteBind(ClientContext &context, TableFunctionBindInput &input,
+static unique_ptr<FunctionData> ScanBind(ClientContext &context, TableFunctionBindInput &input,
                                            vector<LogicalType> &return_types, vector<string> &names) {
 
-	auto result = make_unique<SqliteBindData>();
+	std::cout << ">>>" << __func__ << std::endl;
+
+	auto result = make_unique<RocksdbBindData>();
 	result->file_name = input.inputs[0].GetValue<string>();
 	result->table_name = input.inputs[1].GetValue<string>();
 
@@ -81,7 +84,7 @@ static unique_ptr<FunctionData> SqliteBind(ClientContext &context, TableFunction
 	return std::move(result);
 }
 
-static void SqliteInitInternal(ClientContext &context, const SqliteBindData *bind_data, SqliteLocalState &local_state,
+static void SqliteInitInternal(ClientContext &context, const RocksdbBindData *bind_data, SqliteLocalState &local_state,
                                idx_t rowid_min, idx_t rowid_max) {
 	D_ASSERT(bind_data);
 	D_ASSERT(rowid_min <= rowid_max);
@@ -116,13 +119,13 @@ static void SqliteInitInternal(ClientContext &context, const SqliteBindData *bin
 static unique_ptr<NodeStatistics> SqliteCardinality(ClientContext &context, const FunctionData *bind_data_p) {
 	D_ASSERT(bind_data_p);
 
-	auto bind_data = (const SqliteBindData *)bind_data_p;
+	auto bind_data = (const RocksdbBindData *)bind_data_p;
 	return make_unique<NodeStatistics>(bind_data->max_rowid);
 }
 
 static idx_t SqliteMaxThreads(ClientContext &context, const FunctionData *bind_data_p) {
 	D_ASSERT(bind_data_p);
-	auto bind_data = (const SqliteBindData *)bind_data_p;
+	auto bind_data = (const RocksdbBindData *)bind_data_p;
 	if (bind_data->global_db) {
 		return 1;
 	}
@@ -132,7 +135,7 @@ static idx_t SqliteMaxThreads(ClientContext &context, const FunctionData *bind_d
 static bool SqliteParallelStateNext(ClientContext &context, const FunctionData *bind_data_p, SqliteLocalState &lstate,
                                     SqliteGlobalState &gstate) {
 	D_ASSERT(bind_data_p);
-	auto bind_data = (const SqliteBindData *)bind_data_p;
+	auto bind_data = (const RocksdbBindData *)bind_data_p;
 	lock_guard<mutex> parallel_lock(gstate.lock);
 	if (gstate.position < bind_data->max_rowid) {
 		auto start = gstate.position;
@@ -146,7 +149,7 @@ static bool SqliteParallelStateNext(ClientContext &context, const FunctionData *
 
 static unique_ptr<LocalTableFunctionState>
 SqliteInitLocalState(ExecutionContext &context, TableFunctionInitInput &input, GlobalTableFunctionState *global_state) {
-	auto bind_data = (const SqliteBindData *)input.bind_data;
+	auto bind_data = (const RocksdbBindData *)input.bind_data;
 	auto &gstate = (SqliteGlobalState &)*global_state;
 	auto result = make_unique<SqliteLocalState>();
 	result->column_ids = input.column_ids;
@@ -164,10 +167,12 @@ static unique_ptr<GlobalTableFunctionState> SqliteInitGlobalState(ClientContext 
 	return std::move(result);
 }
 
-static void SqliteScan(ClientContext &context, TableFunctionInput &data, DataChunk &output) {
+static void ScanFunction(ClientContext &context, TableFunctionInput &data, DataChunk &output) {
+	std::cout << ">>>" << __func__ << std::endl;
+
 	auto &state = (SqliteLocalState &)*data.local_state;
 	auto &gstate = (SqliteGlobalState &)*data.global_state;
-	auto bind_data = (const SqliteBindData *)data.bind_data;
+	auto bind_data = (const RocksdbBindData *)data.bind_data;
 
 	while (output.size() == 0) {
 		if (state.done) {
@@ -239,8 +244,10 @@ static void SqliteScan(ClientContext &context, TableFunctionInput &data, DataChu
 }
 
 static string SqliteToString(const FunctionData *bind_data_p) {
+	std::cout << ">>>" << __func__ << std::endl;
+
 	D_ASSERT(bind_data_p);
-	auto bind_data = (const SqliteBindData *)bind_data_p;
+	auto bind_data = (const RocksdbBindData *)bind_data_p;
 	return StringUtil::Format("%s:%s", bind_data->file_name, bind_data->table_name);
 }
 
@@ -256,9 +263,12 @@ SqliteStatistics(ClientContext &context, const FunctionData *bind_data_p,
 }
 */
 
-SqliteScanFunction::SqliteScanFunction()
-    : TableFunction("rocksdb_scan", {LogicalType::VARCHAR, LogicalType::VARCHAR}, SqliteScan, SqliteBind,
+RocksdbScanFunction::RocksdbScanFunction()
+    : TableFunction("rocksdb_scan", {LogicalType::VARCHAR, LogicalType::VARCHAR}, ScanFunction, ScanBind,
                     SqliteInitGlobalState, SqliteInitLocalState) {
+
+	std::cout << ">>>" << __func__ << std::endl;
+
 	cardinality = SqliteCardinality;
 	to_string = SqliteToString;
 	projection_pushdown = true;
@@ -270,11 +280,14 @@ struct AttachFunctionData : public TableFunctionData {
 
 	bool finished = false;
 	bool overwrite = false;
+	// TODO: This is the path to the RocksDB folder, rename?
 	string file_name = "";
 };
 
 static unique_ptr<FunctionData> AttachBind(ClientContext &context, TableFunctionBindInput &input,
                                            vector<LogicalType> &return_types, vector<string> &names) {
+
+	std::cout << ">>>" << __func__ << std::endl;
 
 	auto result = make_unique<AttachFunctionData>();
 	result->file_name = input.inputs[0].GetValue<string>();
@@ -291,32 +304,44 @@ static unique_ptr<FunctionData> AttachBind(ClientContext &context, TableFunction
 }
 
 static void AttachFunction(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {
+
+	std::cout << ">>>" << __func__ << std::endl;
+
 	auto &data = (AttachFunctionData &)*data_p.bind_data;
 	if (data.finished) {
 		return;
 	}
 
-	SQLiteDB db = SQLiteDB::Open(data.file_name);
-	auto dconn = Connection(context.db->GetDatabase(context));
-	{
-		auto tables = db.GetTables();
-		for (auto &table_name : tables) {
-			dconn.TableFunction("rocksdb_scan", {Value(data.file_name), Value(table_name)})
-			    ->CreateView(table_name, data.overwrite, false);
-		}
-	}
-	{
-		SQLiteStatement stmt = db.Prepare("SELECT sql FROM sqlite_master WHERE type='view'");
-		while (stmt.Step()) {
-			auto view_sql = stmt.GetValue<string>(0);
-			dconn.Query(view_sql);
-		}
-	}
+	// TODO: Do we need to access the RocksDB here?
+	//       Sqlite build a view from the list of tables found in the filename
+	//       File is temporary opened and the sqlite_master is scanned with our rocksdb_scan
+	//       function to create views of all tables present
+	//       The SELECT query is executed
+
+	// SQLiteDB db = SQLiteDB::Open(data.file_name);
+	// auto dconn = Connection(context.db->GetDatabase(context));
+	// {
+	// 	auto tables = db.GetTables();
+	// 	for (auto &table_name : tables) {
+	// 		dconn.TableFunction("rocksdb_scan", {Value(data.file_name), Value(table_name)})
+	// 		    ->CreateView(table_name, data.overwrite, false);
+	// 	}
+	// }
+	// {
+	// 	SQLiteStatement stmt = db.Prepare("SELECT sql FROM sqlite_master WHERE type='view'");
+	// 	while (stmt.Step()) {
+	// 		auto view_sql = stmt.GetValue<string>(0);
+	// 		dconn.Query(view_sql);
+	// 	}
+	// }
 	data.finished = true;
 }
 
-SqliteAttachFunction::SqliteAttachFunction()
+RocksdbAttachFunction::RocksdbAttachFunction()
     : TableFunction("rocksdb_attach", {LogicalType::VARCHAR}, AttachFunction, AttachBind) {
+
+	std::cout << ">>>" << __func__ << std::endl;
+
 	named_parameters["overwrite"] = LogicalType::BOOLEAN;
 }
 

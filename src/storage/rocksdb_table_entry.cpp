@@ -16,7 +16,7 @@ unique_ptr<BaseStatistics> SQLiteTableEntry::GetStatistics(ClientContext &contex
 }
 
 TableFunction SQLiteTableEntry::GetScanFunction(ClientContext &context, unique_ptr<FunctionData> &bind_data) {
-	auto result = make_unique<SqliteBindData>();
+	auto result = make_unique<RocksdbBindData>();
 	for (auto &col : columns.Logical()) {
 		result->names.push_back(col.GetName());
 		result->types.push_back(col.GetType());
@@ -40,7 +40,7 @@ TableFunction SQLiteTableEntry::GetScanFunction(ClientContext &context, unique_p
 	}
 
 	bind_data = std::move(result);
-	return SqliteScanFunction();
+	return RocksdbScanFunction();
 }
 
 TableStorageInfo SQLiteTableEntry::GetStorageInfo(ClientContext &context) {

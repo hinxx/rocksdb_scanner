@@ -12,9 +12,9 @@
 
 namespace duckdb {
 
-class SQLiteStorageExtension : public StorageExtension {
+class RocksdbStorageExtension : public StorageExtension {
 public:
-	SQLiteStorageExtension();
+	RocksdbStorageExtension();
 };
 
 } // namespace duckdb

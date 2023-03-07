@@ -24,6 +24,58 @@ D select distinct on(function_name) function_name, function_type, return_type, p
 ...
 
 
+       * added some debug printouts
+...
+D load 'build/release/extension/rocksdb_scanner/rocksdb_scanner.duckdb_extension';
+>>>RocksdbScanFunction
+>>>RocksdbAttachFunction
+
+       * added alias 'rocksdb' -> 'rocksdb_scanner'
+
+│ rocksdb_scanner   │ true    │ true      │ /home/hinxx/.duckdb/extensions/7e68545119/linux_amd…  │ Adds support for reading RocksDB database files                      │ [rocksdb]         │
+
+       * can do ATTACH, but my code is not called ?!
+
+D ATTACH 'sakila.db' (TYPE rocksdb);
+
+       * can do call rocksdb_attach('<name>') and then my code is called! Currently not accessing the RocksDB at all in this call
+
+D call rocksdb_attach('/tmp/rocksdb_simple_example/');
+>>>AttachBind
+>>>AttachFunction
+┌─────────┐
+│ Success │
+│ boolean │
+├─────────┤
+│ 0 rows  │
+└─────────┘
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # DuckDB sqlitescanner extension

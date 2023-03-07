@@ -19,11 +19,11 @@ DUCKDB_EXTENSION_API void rocksdb_scanner_init(duckdb::DatabaseInstance &db) {
 	auto &context = *con.context;
 	auto &catalog = Catalog::GetSystemCatalog(context);
 
-	SqliteScanFunction sqlite_fun;
-	CreateTableFunctionInfo sqlite_info(sqlite_fun);
-	catalog.CreateTableFunction(context, &sqlite_info);
+	RocksdbScanFunction scan_func;
+	CreateTableFunctionInfo scan_info(scan_func);
+	catalog.CreateTableFunction(context, &scan_info);
 
-	SqliteAttachFunction attach_func;
+	RocksdbAttachFunction attach_func;
 
 	CreateTableFunctionInfo attach_info(attach_func);
 	catalog.CreateTableFunction(context, &attach_info);
@@ -31,7 +31,7 @@ DUCKDB_EXTENSION_API void rocksdb_scanner_init(duckdb::DatabaseInstance &db) {
 	auto &config = DBConfig::GetConfig(db);
 	config.AddExtensionOption("rocksdb_all_varchar", "Load all RocksDB columns as VARCHAR columns", LogicalType::BOOLEAN);
 
-	config.storage_extensions["rocksdb_scanner"] = make_unique<SQLiteStorageExtension>();
+	config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
 
 	con.Commit();
 }
@@ -41,6 +41,6 @@ DUCKDB_EXTENSION_API const char *rocksdb_scanner_version() {
 }
 
 DUCKDB_EXTENSION_API void rocksdb_scanner_storage_init(DBConfig &config) {
-	config.storage_extensions["rocksdb_scanner"] = make_unique<SQLiteStorageExtension>();
+	config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
 }
 }

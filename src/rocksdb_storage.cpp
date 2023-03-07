@@ -23,7 +23,7 @@ static unique_ptr<TransactionManager> SQLiteCreateTransactionManager(StorageExte
 	return make_unique<SQLiteTransactionManager>(db, sqlite_catalog);
 }
 
-SQLiteStorageExtension::SQLiteStorageExtension() {
+RocksdbStorageExtension::RocksdbStorageExtension() {
 	attach = SQLiteAttach;
 	create_transaction_manager = SQLiteCreateTransactionManager;
 }

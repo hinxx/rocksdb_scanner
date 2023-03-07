@@ -13,7 +13,7 @@
 namespace duckdb {
 class SQLiteDB;
 
-struct SqliteBindData : public TableFunctionData {
+struct RocksdbBindData : public TableFunctionData {
 	string file_name;
 	string table_name;
 
@@ -27,14 +27,14 @@ struct SqliteBindData : public TableFunctionData {
 	SQLiteDB *global_db;
 };
 
-class SqliteScanFunction : public TableFunction {
+class RocksdbScanFunction : public TableFunction {
 public:
-	SqliteScanFunction();
+	RocksdbScanFunction();
 };
 
-class SqliteAttachFunction : public TableFunction {
+class RocksdbAttachFunction : public TableFunction {
 public:
-	SqliteAttachFunction();
+	RocksdbAttachFunction();
 };
 
 } // namespace duckdb
