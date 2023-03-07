@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_transaction_manager.hpp
+// storage/rocksdb_transaction_manager.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -9,8 +9,8 @@
 #pragma once
 
 #include "duckdb/transaction/transaction_manager.hpp"
-#include "storage/sqlite_catalog.hpp"
-#include "storage/sqlite_transaction.hpp"
+#include "storage/rocksdb_catalog.hpp"
+#include "storage/rocksdb_transaction.hpp"
 
 namespace duckdb {
 

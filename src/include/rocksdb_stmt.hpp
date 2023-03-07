@@ -1,14 +1,14 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// sqlite_utils.hpp
+// rocksdb_utils.hpp
 //
 //
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
-#include "sqlite_utils.hpp"
+#include "rocksdb_utils.hpp"
 
 #include <cstddef>
 

@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_transaction.hpp
+// storage/rocksdb_transaction.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -10,7 +10,7 @@
 
 #include "duckdb/transaction/transaction.hpp"
 #include "duckdb/common/case_insensitive_map.hpp"
-#include "sqlite_db.hpp"
+#include "rocksdb_db.hpp"
 
 namespace duckdb {
 class SQLiteCatalog;

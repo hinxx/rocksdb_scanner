@@ -1,5 +1,5 @@
-#include "storage/sqlite_catalog.hpp"
-#include "storage/sqlite_index.hpp"
+#include "storage/rocksdb_catalog.hpp"
+#include "storage/rocksdb_index.hpp"
 #include "duckdb/parser/statement/create_statement.hpp"
 #include "duckdb/planner/operator/logical_extension_operator.hpp"
 #include "duckdb/catalog/catalog_entry/table_catalog_entry.hpp"

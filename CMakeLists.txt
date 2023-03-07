@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.12)
-set(TARGET_NAME sqlite_scanner)
+set(TARGET_NAME rocksdb_scanner)
 project(${TARGET_NAME})
 include_directories(sqlite)
 

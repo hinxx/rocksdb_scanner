@@ -1,14 +1,14 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// sqlite_db.hpp
+// rocksdb_db.hpp
 //
 //
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
-#include "sqlite_utils.hpp"
+#include "rocksdb_utils.hpp"
 
 namespace duckdb {
 class SQLiteStatement;

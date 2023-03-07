@@ -1,15 +1,15 @@
 add_library(
-  sqlite_ext_storage OBJECT
-  sqlite_catalog.cpp
-  sqlite_delete.cpp
-  sqlite_index.cpp
-  sqlite_index_entry.cpp
-  sqlite_insert.cpp
-  sqlite_table_entry.cpp
-  sqlite_schema_entry.cpp
-  sqlite_transaction.cpp
-  sqlite_transaction_manager.cpp
-  sqlite_update.cpp)
+  rocksdb_ext_storage OBJECT
+  rocksdb_catalog.cpp
+  rocksdb_delete.cpp
+  rocksdb_index.cpp
+  rocksdb_index_entry.cpp
+  rocksdb_insert.cpp
+  rocksdb_table_entry.cpp
+  rocksdb_schema_entry.cpp
+  rocksdb_transaction.cpp
+  rocksdb_transaction_manager.cpp
+  rocksdb_update.cpp)
 set(ALL_OBJECT_FILES
-    ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:sqlite_ext_storage>
+    ${ALL_OBJECT_FILES} $<TARGET_OBJECTS:rocksdb_ext_storage>
     PARENT_SCOPE)

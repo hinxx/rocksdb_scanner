@@ -1,10 +1,10 @@
-#include "storage/sqlite_delete.hpp"
-#include "storage/sqlite_table_entry.hpp"
+#include "storage/rocksdb_delete.hpp"
+#include "storage/rocksdb_table_entry.hpp"
 #include "duckdb/planner/operator/logical_delete.hpp"
-#include "storage/sqlite_catalog.hpp"
-#include "storage/sqlite_transaction.hpp"
-#include "sqlite_db.hpp"
-#include "sqlite_stmt.hpp"
+#include "storage/rocksdb_catalog.hpp"
+#include "storage/rocksdb_transaction.hpp"
+#include "rocksdb_db.hpp"
+#include "rocksdb_stmt.hpp"
 
 namespace duckdb {
 

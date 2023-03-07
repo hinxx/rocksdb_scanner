@@ -1,4 +1,4 @@
-#include "storage/sqlite_index_entry.hpp"
+#include "storage/rocksdb_index_entry.hpp"
 #include "duckdb/catalog/catalog_entry/schema_catalog_entry.hpp"
 
 namespace duckdb {

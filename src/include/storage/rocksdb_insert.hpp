@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_delete.hpp
+// storage/rocksdb_insert.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -9,15 +9,25 @@
 #pragma once
 
 #include "duckdb/execution/physical_operator.hpp"
+#include "duckdb/common/index_vector.hpp"
 
 namespace duckdb {
 
-class SQLiteDelete : public PhysicalOperator {
+class SQLiteInsert : public PhysicalOperator {
 public:
-	SQLiteDelete(LogicalOperator &op, TableCatalogEntry &table);
+	//! INSERT INTO
+	SQLiteInsert(LogicalOperator &op, TableCatalogEntry *table, physical_index_vector_t<idx_t> column_index_map);
+	//! CREATE TABLE AS
+	SQLiteInsert(LogicalOperator &op, SchemaCatalogEntry *schema, unique_ptr<BoundCreateTableInfo> info);
 
-	//! The table to delete from
-	TableCatalogEntry &table;
+	//! The table to insert into
+	TableCatalogEntry *table;
+	//! Table schema, in case of CREATE TABLE AS
+	SchemaCatalogEntry *schema;
+	//! Create table info, in case of CREATE TABLE AS
+	unique_ptr<BoundCreateTableInfo> info;
+	//! column_index_map
+	physical_index_vector_t<idx_t> column_index_map;
 
 public:
 	// Source interface

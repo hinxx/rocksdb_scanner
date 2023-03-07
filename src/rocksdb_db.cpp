@@ -3,8 +3,8 @@
 #include "duckdb/parser/expression/constant_expression.hpp"
 #include "duckdb/parser/column_list.hpp"
 #include "duckdb/parser/parser.hpp"
-#include "sqlite_db.hpp"
-#include "sqlite_stmt.hpp"
+#include "rocksdb_db.hpp"
+#include "rocksdb_stmt.hpp"
 
 namespace duckdb {
 

@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_insert.hpp
+// storage/rocksdb_update.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -13,21 +13,14 @@
 
 namespace duckdb {
 
-class SQLiteInsert : public PhysicalOperator {
+class SQLiteUpdate : public PhysicalOperator {
 public:
-	//! INSERT INTO
-	SQLiteInsert(LogicalOperator &op, TableCatalogEntry *table, physical_index_vector_t<idx_t> column_index_map);
-	//! CREATE TABLE AS
-	SQLiteInsert(LogicalOperator &op, SchemaCatalogEntry *schema, unique_ptr<BoundCreateTableInfo> info);
+	SQLiteUpdate(LogicalOperator &op, TableCatalogEntry &table, vector<PhysicalIndex> columns);
 
-	//! The table to insert into
-	TableCatalogEntry *table;
-	//! Table schema, in case of CREATE TABLE AS
-	SchemaCatalogEntry *schema;
-	//! Create table info, in case of CREATE TABLE AS
-	unique_ptr<BoundCreateTableInfo> info;
-	//! column_index_map
-	physical_index_vector_t<idx_t> column_index_map;
+	//! The table to delete from
+	TableCatalogEntry &table;
+	//! The set of columns to update
+	vector<PhysicalIndex> columns;
 
 public:
 	// Source interface

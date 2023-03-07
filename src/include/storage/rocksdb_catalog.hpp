@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_catalog.hpp
+// storage/rocksdb_catalog.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -10,7 +10,7 @@
 
 #include "duckdb/catalog/catalog.hpp"
 #include "duckdb/common/enums/access_mode.hpp"
-#include "sqlite_db.hpp"
+#include "rocksdb_db.hpp"
 
 namespace duckdb {
 class SQLiteSchemaEntry;

@@ -1,7 +1,7 @@
-#include "storage/sqlite_catalog.hpp"
-#include "storage/sqlite_schema_entry.hpp"
-#include "storage/sqlite_transaction.hpp"
-#include "sqlite_db.hpp"
+#include "storage/rocksdb_catalog.hpp"
+#include "storage/rocksdb_schema_entry.hpp"
+#include "storage/rocksdb_transaction.hpp"
+#include "rocksdb_db.hpp"
 #include "duckdb/storage/database_size.hpp"
 
 namespace duckdb {

@@ -1,8 +1,8 @@
-#include "storage/sqlite_catalog.hpp"
-#include "storage/sqlite_table_entry.hpp"
-#include "storage/sqlite_transaction.hpp"
+#include "storage/rocksdb_catalog.hpp"
+#include "storage/rocksdb_table_entry.hpp"
+#include "storage/rocksdb_transaction.hpp"
 #include "duckdb/storage/statistics/base_statistics.hpp"
-#include "sqlite_scanner.hpp"
+#include "rocksdb_scanner.hpp"
 #include "duckdb/storage/table_storage_info.hpp"
 
 namespace duckdb {

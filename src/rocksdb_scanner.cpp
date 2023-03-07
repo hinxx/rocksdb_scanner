@@ -1,8 +1,8 @@
 #include "duckdb.hpp"
 
-#include "sqlite_db.hpp"
-#include "sqlite_stmt.hpp"
-#include "sqlite_scanner.hpp"
+#include "rocksdb_db.hpp"
+#include "rocksdb_stmt.hpp"
+#include "rocksdb_scanner.hpp"
 #include <stdint.h>
 #include "duckdb/parser/parser.hpp"
 #include "duckdb/parser/expression/cast_expression.hpp"
@@ -57,7 +57,7 @@ static unique_ptr<FunctionData> SqliteBind(ClientContext &context, TableFunction
 
 	result->all_varchar = false;
 	Value sqlite_all_varchar;
-	if (context.TryGetCurrentSetting("sqlite_all_varchar", sqlite_all_varchar)) {
+	if (context.TryGetCurrentSetting("rocksdb_all_varchar", sqlite_all_varchar)) {
 		result->all_varchar = BooleanValue::Get(sqlite_all_varchar);
 	}
 	db.GetTableInfo(result->table_name, columns, constraints, result->all_varchar);
@@ -257,7 +257,7 @@ SqliteStatistics(ClientContext &context, const FunctionData *bind_data_p,
 */
 
 SqliteScanFunction::SqliteScanFunction()
-    : TableFunction("sqlite_scan", {LogicalType::VARCHAR, LogicalType::VARCHAR}, SqliteScan, SqliteBind,
+    : TableFunction("rocksdb_scan", {LogicalType::VARCHAR, LogicalType::VARCHAR}, SqliteScan, SqliteBind,
                     SqliteInitGlobalState, SqliteInitLocalState) {
 	cardinality = SqliteCardinality;
 	to_string = SqliteToString;
@@ -301,7 +301,7 @@ static void AttachFunction(ClientContext &context, TableFunctionInput &data_p, D
 	{
 		auto tables = db.GetTables();
 		for (auto &table_name : tables) {
-			dconn.TableFunction("sqlite_scan", {Value(data.file_name), Value(table_name)})
+			dconn.TableFunction("rocksdb_scan", {Value(data.file_name), Value(table_name)})
 			    ->CreateView(table_name, data.overwrite, false);
 		}
 	}
@@ -316,7 +316,7 @@ static void AttachFunction(ClientContext &context, TableFunctionInput &data_p, D
 }
 
 SqliteAttachFunction::SqliteAttachFunction()
-    : TableFunction("sqlite_attach", {LogicalType::VARCHAR}, AttachFunction, AttachBind) {
+    : TableFunction("rocksdb_attach", {LogicalType::VARCHAR}, AttachFunction, AttachBind) {
 	named_parameters["overwrite"] = LogicalType::BOOLEAN;
 }
 

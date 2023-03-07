@@ -1,7 +1,7 @@
 //===----------------------------------------------------------------------===//
 //                         DuckDB
 //
-// storage/sqlite_update.hpp
+// storage/rocksdb_delete.hpp
 //
 //
 //===----------------------------------------------------------------------===//
@@ -9,18 +9,15 @@
 #pragma once
 
 #include "duckdb/execution/physical_operator.hpp"
-#include "duckdb/common/index_vector.hpp"
 
 namespace duckdb {
 
-class SQLiteUpdate : public PhysicalOperator {
+class SQLiteDelete : public PhysicalOperator {
 public:
-	SQLiteUpdate(LogicalOperator &op, TableCatalogEntry &table, vector<PhysicalIndex> columns);
+	SQLiteDelete(LogicalOperator &op, TableCatalogEntry &table);
 
 	//! The table to delete from
 	TableCatalogEntry &table;
-	//! The set of columns to update
-	vector<PhysicalIndex> columns;
 
 public:
 	// Source interface
