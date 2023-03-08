@@ -45,7 +45,7 @@ struct SqliteGlobalState : public GlobalTableFunctionState {
 static unique_ptr<FunctionData> ScanBind(ClientContext &context, TableFunctionBindInput &input,
                                            vector<LogicalType> &return_types, vector<string> &names) {
 
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	auto result = make_unique<RocksdbBindData>();
 	result->file_name = input.inputs[0].GetValue<string>();
@@ -168,7 +168,7 @@ static unique_ptr<GlobalTableFunctionState> SqliteInitGlobalState(ClientContext 
 }
 
 static void ScanFunction(ClientContext &context, TableFunctionInput &data, DataChunk &output) {
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	auto &state = (SqliteLocalState &)*data.local_state;
 	auto &gstate = (SqliteGlobalState &)*data.global_state;
@@ -244,7 +244,7 @@ static void ScanFunction(ClientContext &context, TableFunctionInput &data, DataC
 }
 
 static string SqliteToString(const FunctionData *bind_data_p) {
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	D_ASSERT(bind_data_p);
 	auto bind_data = (const RocksdbBindData *)bind_data_p;
@@ -267,7 +267,7 @@ RocksdbScanFunction::RocksdbScanFunction()
     : TableFunction("rocksdb_scan", {LogicalType::VARCHAR, LogicalType::VARCHAR}, ScanFunction, ScanBind,
                     SqliteInitGlobalState, SqliteInitLocalState) {
 
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	cardinality = SqliteCardinality;
 	to_string = SqliteToString;
@@ -287,7 +287,7 @@ struct AttachFunctionData : public TableFunctionData {
 static unique_ptr<FunctionData> AttachBind(ClientContext &context, TableFunctionBindInput &input,
                                            vector<LogicalType> &return_types, vector<string> &names) {
 
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	auto result = make_unique<AttachFunctionData>();
 	result->file_name = input.inputs[0].GetValue<string>();
@@ -305,7 +305,7 @@ static unique_ptr<FunctionData> AttachBind(ClientContext &context, TableFunction
 
 static void AttachFunction(ClientContext &context, TableFunctionInput &data_p, DataChunk &output) {
 
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	auto &data = (AttachFunctionData &)*data_p.bind_data;
 	if (data.finished) {
@@ -340,7 +340,7 @@ static void AttachFunction(ClientContext &context, TableFunctionInput &data_p, D
 RocksdbAttachFunction::RocksdbAttachFunction()
     : TableFunction("rocksdb_attach", {LogicalType::VARCHAR}, AttachFunction, AttachBind) {
 
-	std::cout << ">>>" << __func__ << std::endl;
+	std::cout << ">>> " << __func__ << std::endl;
 
 	named_parameters["overwrite"] = LogicalType::BOOLEAN;
 }
