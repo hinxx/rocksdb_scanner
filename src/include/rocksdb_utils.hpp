@@ -11,6 +11,8 @@
 #include "duckdb.hpp"
 #include "sqlite3.h"
 
+#include "rocksdb/db.h"
+
 namespace duckdb {
 
 class SQLiteUtils {

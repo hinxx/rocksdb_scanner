@@ -13,6 +13,10 @@
 #include "duckdb/main/config.hpp"
 #include "duckdb/storage/storage_extension.hpp"
 
+#include "rocksdb/db.h"
+#include "rocksdb/options.h"
+#include "rocksdb/slice.h"
+
 #include <cmath>
 #include <iostream> // debug
 
