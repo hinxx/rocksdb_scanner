@@ -1,4 +1,5 @@
 [submodule "duckdb"]
 	path = duckdb
-	url = https://github.com/hinxx/duckdb.git
+	# url = https://github.com/hinxx/duckdb.git
+	url = git@github.com:hinxx/duckdb.git
 	branch = rocksdb
