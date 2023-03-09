@@ -31,7 +31,7 @@ DUCKDB_EXTENSION_API void rocksdb_scanner_init(duckdb::DatabaseInstance &db) {
 	auto &config = DBConfig::GetConfig(db);
 	config.AddExtensionOption("rocksdb_all_varchar", "Load all RocksDB columns as VARCHAR columns", LogicalType::BOOLEAN);
 
-	config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
+	// config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
 
 	con.Commit();
 }
@@ -40,7 +40,7 @@ DUCKDB_EXTENSION_API const char *rocksdb_scanner_version() {
 	return DuckDB::LibraryVersion();
 }
 
-DUCKDB_EXTENSION_API void rocksdb_scanner_storage_init(DBConfig &config) {
-	config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
-}
+// DUCKDB_EXTENSION_API void rocksdb_scanner_storage_init(DBConfig &config) {
+// 	config.storage_extensions["rocksdb_scanner"] = make_unique<RocksdbStorageExtension>();
+// }
 }
