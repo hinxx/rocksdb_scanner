@@ -11,7 +11,10 @@
 #include "duckdb.hpp"
 
 namespace duckdb {
+// REMOVE ME!
 class SQLiteDB;
+
+class RocksDB;
 
 struct RocksdbBindData : public TableFunctionData {
 	string file_name;
@@ -24,7 +27,11 @@ struct RocksdbBindData : public TableFunctionData {
 	bool all_varchar = false;
 
 	idx_t rows_per_group = 122880;
+	// REMOVE ME!
 	SQLiteDB *global_db;
+
+	string rocksdb_path_name;
+	RocksDB *rocksdb_global_db;
 };
 
 class RocksdbScanFunction : public TableFunction {

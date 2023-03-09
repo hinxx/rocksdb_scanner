@@ -22,19 +22,24 @@
 
 namespace duckdb {
 
-struct SqliteLocalState : public LocalTableFunctionState {
+struct RocksdbLocalState : public LocalTableFunctionState {
+	// REMOVE ME!
 	SQLiteDB *db;
 	SQLiteDB owned_db;
 	SQLiteStatement stmt;
+
+	RocksDB *rocksdb_db;
+	RocksDB rocksdb_owned_db;
+
 	bool done = false;
 	vector<column_t> column_ids;
 
-	~SqliteLocalState() {
+	~RocksdbLocalState() {
 	}
 };
 
-struct SqliteGlobalState : public GlobalTableFunctionState {
-	SqliteGlobalState(idx_t max_threads) : max_threads(max_threads) {
+struct RocksdbGlobalState : public GlobalTableFunctionState {
+	RocksdbGlobalState(idx_t max_threads) : max_threads(max_threads) {
 	}
 
 	mutex lock;
@@ -52,9 +57,41 @@ static unique_ptr<FunctionData> ScanBind(ClientContext &context, TableFunctionBi
 	std::cout << ">>> " << __func__ << std::endl;
 
 	auto result = make_unique<RocksdbBindData>();
+
+	result->rocksdb_path_name = "/tmp/rocksdb_simple_example/";
+	RocksDB rocksdb_db;
+	rocksdb_db = RocksDB::Open(result->rocksdb_path_name);
+	std::cout << ">>> " << __func__ << "rocksdb open " << rocksdb_db.IsOpen() << std::endl;
+
+	std::string value;
+	rocksdb::Status s = rocksdb_db.db->Get(rocksdb::ReadOptions(), "key1", &value);
+
+	rocksdb::Iterator* it = rocksdb_db.db->NewIterator(rocksdb::ReadOptions());
+	for (it->SeekToFirst(); it->Valid(); it->Next()) {
+		std::cout << it->key().ToString() << ": " << it->value().ToString() << std::endl;
+	}
+	assert(it->status().ok()); // Check for any errors found during the scan
+	delete it;
+
+	rocksdb_db.Close();
+
+	names.push_back(std::string("key"));
+	return_types.push_back(LogicalType(LogicalTypeId::VARCHAR));
+	names.push_back(std::string("value"));
+	return_types.push_back(LogicalType(LogicalTypeId::VARCHAR));
+	result->names = names;
+	result->types = return_types;
+	// TODO: how to get max rows?
+	result->max_rowid = idx_t(-1);
+	// set in RocksdbBindData constructor idx_t rows_per_group = 122880;
+	// result->rows_per_group = idx_t(-1);
+
+	return std::move(result);
+
+/*
+	// REMOVE ME
 	result->file_name = input.inputs[0].GetValue<string>();
 	result->table_name = input.inputs[1].GetValue<string>();
-
 	SQLiteDB db;
 	SQLiteStatement stmt;
 	db = SQLiteDB::Open(result->file_name);
@@ -86,12 +123,15 @@ static unique_ptr<FunctionData> ScanBind(ClientContext &context, TableFunctionBi
 	result->types = return_types;
 
 	return std::move(result);
+*/
 }
 
-static void SqliteInitInternal(ClientContext &context, const RocksdbBindData *bind_data, SqliteLocalState &local_state,
+static void SqliteInitInternal(ClientContext &context, const RocksdbBindData *bind_data, RocksdbLocalState &local_state,
                                idx_t rowid_min, idx_t rowid_max) {
 	D_ASSERT(bind_data);
 	D_ASSERT(rowid_min <= rowid_max);
+
+	std::cout << " >>> " << __func__ << " rowid_min " << rowid_min << " rowid_max " << rowid_max << std::endl;
 
 	local_state.done = false;
 	// we may have leftover statements or connections from a previous call to this function
@@ -136,8 +176,8 @@ static idx_t SqliteMaxThreads(ClientContext &context, const FunctionData *bind_d
 	return bind_data->max_rowid / bind_data->rows_per_group;
 }
 
-static bool SqliteParallelStateNext(ClientContext &context, const FunctionData *bind_data_p, SqliteLocalState &lstate,
-                                    SqliteGlobalState &gstate) {
+static bool SqliteParallelStateNext(ClientContext &context, const FunctionData *bind_data_p, RocksdbLocalState &lstate,
+                                    RocksdbGlobalState &gstate) {
 	D_ASSERT(bind_data_p);
 	auto bind_data = (const RocksdbBindData *)bind_data_p;
 	lock_guard<mutex> parallel_lock(gstate.lock);
@@ -154,10 +194,11 @@ static bool SqliteParallelStateNext(ClientContext &context, const FunctionData *
 static unique_ptr<LocalTableFunctionState>
 SqliteInitLocalState(ExecutionContext &context, TableFunctionInitInput &input, GlobalTableFunctionState *global_state) {
 	auto bind_data = (const RocksdbBindData *)input.bind_data;
-	auto &gstate = (SqliteGlobalState &)*global_state;
-	auto result = make_unique<SqliteLocalState>();
+	auto &gstate = (RocksdbGlobalState &)*global_state;
+	auto result = make_unique<RocksdbLocalState>();
 	result->column_ids = input.column_ids;
 	result->db = bind_data->global_db;
+	std::cout << " >>> " << __func__ << " bind_data->global_db " << bind_data->global_db << std::endl;
 	if (!SqliteParallelStateNext(context.client, input.bind_data, *result, gstate)) {
 		result->done = true;
 	}
@@ -166,16 +207,17 @@ SqliteInitLocalState(ExecutionContext &context, TableFunctionInitInput &input, G
 
 static unique_ptr<GlobalTableFunctionState> SqliteInitGlobalState(ClientContext &context,
                                                                   TableFunctionInitInput &input) {
-	auto result = make_unique<SqliteGlobalState>(SqliteMaxThreads(context, input.bind_data));
+	auto result = make_unique<RocksdbGlobalState>(SqliteMaxThreads(context, input.bind_data));
 	result->position = 0;
+	std::cout << " >>> " << __func__ << " max_threads " << result->max_threads << std::endl;
 	return std::move(result);
 }
 
 static void ScanFunction(ClientContext &context, TableFunctionInput &data, DataChunk &output) {
 	std::cout << ">>> " << __func__ << std::endl;
 
-	auto &state = (SqliteLocalState &)*data.local_state;
-	auto &gstate = (SqliteGlobalState &)*data.global_state;
+	auto &state = (RocksdbLocalState &)*data.local_state;
+	auto &gstate = (RocksdbGlobalState &)*data.global_state;
 	auto bind_data = (const RocksdbBindData *)data.bind_data;
 
 	while (output.size() == 0) {

@@ -8,6 +8,69 @@
 
 namespace duckdb {
 
+
+RocksDB::RocksDB() : db(nullptr) {
+}
+
+RocksDB::RocksDB(rocksdb::DB *db) : db(db) {
+}
+
+RocksDB::~RocksDB() {
+	Close();
+}
+
+RocksDB::RocksDB(RocksDB &&other) noexcept {
+	std::swap(db, other.db);
+}
+
+RocksDB &RocksDB::operator=(RocksDB &&other) noexcept {
+	std::swap(db, other.db);
+	return *this;
+}
+
+RocksDB RocksDB::Open(const string &path, bool is_read_only, bool is_shared) {
+	RocksDB result;
+	// int flags = SQLITE_OPEN_PRIVATECACHE;
+	// if (is_read_only) {
+	// 	flags |= SQLITE_OPEN_READONLY;
+	// } else {
+	// 	flags |= SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE;
+	// }
+	// if (!is_shared) {
+	// 	// FIXME: we should just make sure we are not re-using the same `sqlite3` object across threads
+	// 	flags |= SQLITE_OPEN_NOMUTEX;
+	// }
+	// flags |= SQLITE_OPEN_EXRESCODE;
+	rocksdb::Options options;
+	// Optimize RocksDB. This is the easiest way to get RocksDB to perform well
+	options.IncreaseParallelism();
+	options.OptimizeLevelStyleCompaction();
+
+	rocksdb::Status rc = rocksdb::DB::OpenForReadOnly(options, path.c_str(), &result.db);
+	if (! rc.ok()) {
+		throw std::runtime_error("Unable to open database \"" + path + "\": " + rc.ToString());
+	}
+	return result;
+}
+
+bool RocksDB::IsOpen() {
+	return db;
+}
+
+void RocksDB::Close() {
+	if (! IsOpen()) {
+		return;
+	}
+	rocksdb::Status rc = db->Close();
+	if (! rc.ok()) {
+		throw InternalException("Failed to close database - " + rc.ToString());
+	}
+	delete db;
+	db = nullptr;
+}
+
+
+
 SQLiteDB::SQLiteDB() : db(nullptr) {
 }
 

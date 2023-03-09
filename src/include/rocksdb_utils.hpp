@@ -9,9 +9,12 @@
 #pragma once
 
 #include "duckdb.hpp"
+// REMOVE ME!
 #include "sqlite3.h"
 
 #include "rocksdb/db.h"
+#include "rocksdb/options.h"
+#include "rocksdb/slice.h"
 
 namespace duckdb {
 

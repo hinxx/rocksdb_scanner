@@ -1,5 +1,9 @@
 include_directories(include)
 
+set(ROCKSDB "/data/data/Code/rocksdb")
+#list(APPEND CMAKE_PREFIX_PATH ${ROCKSDB})
+include_directories(${ROCKSDB}/include)
+
 # add_subdirectory(storage)
 
 add_library(
